@@ -9,7 +9,7 @@ struct dati{
     int time;
 }data;
 
-int gestOF(dati data){
+int gestOF(struct dati data){
     if(strcmp(data.on_of, "off")==0){
         return -1; //in caso di off
     }

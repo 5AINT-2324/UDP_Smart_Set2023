@@ -1,6 +1,7 @@
 // Created by Giacomo Cunardi on 28/09/23.
 //
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -44,7 +45,7 @@ int main(void)
         {
             while (1)
             {
-                if (( UDP_receive(&ip_address, &port_number, buffer, sizeof(buffer))) > 0) // Receive a datagram and check the message
+                if ((UDP_receive(&ip_address, &port_number, buffer, sizeof(buffer))) > 0) // Receive a datagram and check the message
                 {
                     if (ONOFF(buffer) == 1)
                     {
