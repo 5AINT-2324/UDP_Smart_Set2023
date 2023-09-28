@@ -1,72 +1,63 @@
-// Created by Giacomo Cunardi on 28/09/23.
-//
-
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "UDP.h"
 
 #define UDP_PORT 23365
+#define BUFFER_SIZE 1024
 
-int ONOFF(unsigned char buffer[1024]) // 0 = OK 1 = ERR (La funzione non è completa ma simula il funzionanamnto della lampadina)
-{
-    sleep(atoi((const char *) buffer[1]));
+int ONOFF(unsigned char buffer[BUFFER_SIZE]) {
+    char *endptr;
+    long sleepTime = strtol((const char *) &buffer[1], &endptr, 10);
+
+    // Check for conversion errors
+    if (*endptr != '\0' || errno == ERANGE) {
+        fprintf(stderr, "ERR 103: Conversion error\n");
+        return 1; // Error code
+    }
+
+    sleep(sleepTime);
     return rand()%2;
 }
 
-int main(void)
-{
-    unsigned char buffer[1024];     // Reception buffer
-    unsigned long ip_address;       // Variable to store the client's IP address
-    unsigned short port_number;     // Variable to store the client's port number
-    int n;
-    short iSwitch = 0;
+void cleanup() {
+    // Close the socket here
+    UDP_close();
+}
 
-    for(n = 0; n < 1024; n++)
-    {
-        buffer[n] = 0;
-    }
+int main(void) {
+    unsigned char buffer[BUFFER_SIZE];
+    unsigned long ip_address;
+    unsigned short port_number;
 
-    if (UDP_init(UDP_PORT) < 0) // Initialize the socket with UDP port number 54321
-    {
-        printf("ERR 101: Socket Error\r\n");
+    memset(buffer, 0, sizeof(buffer));
+
+    if (UDP_init(UDP_PORT) < 0) {
+        fprintf(stderr, "ERR 101: Socket Error\n");
         return -1;
     }
 
+    printf("Service Activated\n");
 
-    printf("Service Activated\r\n");
+    // Register cleanup function to be called when the program exits
+    atexit(cleanup);
 
-
-    for (int i = 0; i < 2; ++i)
-    {
-        if (iSwitch == 0)
-        {
-            while (1)
-            {
-                if ((UDP_receive(&ip_address, &port_number, buffer, sizeof(buffer))) > 0) // Receive a datagram and check the message
-                {
-                    if (ONOFF(buffer) == 1)
-                    {
-                        printf("ERR 102: Object error\n\r");
-                        buffer[1023] = 1;
-                        break;
-                    }
-
-                    UDP_send(ip_address, port_number, (void*)&buffer, sizeof(buffer)); // Send the datagram back to the client
-                }
+    while (1) {
+        if ((UDP_receive(&ip_address, &port_number, buffer, sizeof(buffer))) > 0) {
+            if (ONOFF(buffer) == 1) {
+                fprintf(stderr, "ERR 102: Object error\n");
+                buffer[BUFFER_SIZE - 1] = 1;
+                break;
             }
-            iSwitch = 1;
+
+            UDP_send(ip_address, port_number, (void *) &buffer, sizeof(buffer));
         }
-
-        else
-        {
-            UDP_close();
-            return 0;
-        }
-
-
     }
+
+    // The cleanup function registered with atexit will be called upon program exit
+
 
 }
