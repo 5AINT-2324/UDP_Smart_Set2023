@@ -1,53 +1,72 @@
+// Created by Giacomo Cunardi on 28/09/23.
 //
-//Created by Gabriele on 28/09/23
-//
+
 
 #include <stdio.h>
-#include <time.h>
-#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "UDP.h"
-#define TIMEOUT 1*CLOCKS_PER_SEC // 1 secondo
+
 #define UDP_PORT 23365
 
-int main(int argc, char* argv[]){
-    unsigned char buffer[1024];
-    unsigned long ip_address;
-    unsigned short port_number;
-    unsigned long start, now;
-    
-    if (argc < 4) // 1 argument required ip address, 2 arguments required on/off and 3 arguments required time
-    {
-        printf("Deve essere fornito l'indirizzo IP del server!\r\n");
-        return -1;
-    }
-    // inizializzazione socket con numero di porta UDP arbitrario
-    if (UDP_init(0) < 0)
-    {
-        printf("Errore inizializzazione socket!\r\n");
-        return -1;
-    }
-    ip_address = IP_to_bin(argv[1]);
-    buffer[0] = (unsigned char) argv[1];
-    buffer[1] = (unsigned char) argv[2];
-    port_number = UDP_PORT;
+int ONOFF(unsigned char buffer[1024]) // 0 = OK 1 = ERR (La funzione non è completa ma simula il funzionanamnto della lampadina)
+{
+    sleep(atoi((const char *) buffer[1]));
+    return rand()%2;
+}
 
-    UDP_send(ip_address, port_number, buffer, sizeof(buffer));
-    start = clock();
-    now = clock();
-    while((now - start) < TIMEOUT) {
-        UDP_receive((unsigned long *) ip_address, (unsigned short *) port_number, buffer, sizeof(buffer));
-        if(atoi(buffer[1023]) == 1){
-            printf("ERR\r\n");
+int main(void)
+{
+    unsigned char buffer[1024];     // Reception buffer
+    unsigned long ip_address;       // Variable to store the client's IP address
+    unsigned short port_number;     // Variable to store the client's port number
+    int n;
+    short iSwitch = 0;
+
+    for(n = 0; n < 1024; n++)
+    {
+        buffer[n] = 0;
+    }
+
+    if (UDP_init(UDP_PORT) < 0) // Initialize the socket with UDP port number 54321
+    {
+        printf("ERR 101: Socket Error\r\n");
+        return -1;
+    }
+
+
+    printf("Service Activated\r\n");
+
+
+    for (int i = 0; i < 2; ++i)
+    {
+        if (iSwitch == 0)
+        {
+            while (1)
+            {
+                if ((UDP_receive(&ip_address, &port_number, buffer, sizeof(buffer))) > 0) // Receive a datagram and check the message
+                {
+                    if (ONOFF(buffer) == 1)
+                    {
+                        printf("ERR 102: Object error\n\r");
+                        buffer[1023] = 1;
+                        break;
+                    }
+
+                    UDP_send(ip_address, port_number, (void*)&buffer, sizeof(buffer)); // Send the datagram back to the client
+                }
+            }
+            iSwitch = 1;
+        }
+
+        else
+        {
             UDP_close();
             return 0;
-        }else{
-            printf("OK\r\n");
-            UDP_close();
-            return 1;
         }
-        now = clock();
+
+
     }
-    printf("Nessuna risposta ricevuta\r\n");
-    UDP_close();
-    return -1;
+
 }
