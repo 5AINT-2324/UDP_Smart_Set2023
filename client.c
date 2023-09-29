@@ -39,34 +39,22 @@ int main(void)
     printf("Service Activated\r\n");
 
 
-    for (int i = 0; i < 2; ++i)
+    while (iSwitch == 0)
     {
-        if (iSwitch == 0)
+        if ((UDP_receive(&ip_address, &port_number, buffer, sizeof(buffer))) > 0) // Receive a datagram and check the message
         {
-            while (1)
-            {
-                if ((UDP_receive(&ip_address, &port_number, buffer, sizeof(buffer))) > 0) // Receive a datagram and check the message
-                {
-                    if (ONOFF(buffer) == 1)
-                    {
-                        printf("ERR 102: Object error\n\r");
-                        buffer[1023] = 1;
-                        break;
-                    }
-
-                    UDP_send(ip_address, port_number, (void*)&buffer, sizeof(buffer)); // Send the datagram back to the client
-                }
+            if (ONOFF(buffer) == 1) {
+                printf("ERR 102: Object error\n\r");
+                buffer[1023] = 1;
+                iSwitch = 1;
             }
-            iSwitch = 1;
-        }
 
-        else
-        {
-            UDP_close();
-            return 0;
+            UDP_send(ip_address, port_number, (void *) &buffer,sizeof(buffer)); // Send the datagram back to the client
         }
-
 
     }
+    UDP_close();
+    return 0;
+
 
 }
