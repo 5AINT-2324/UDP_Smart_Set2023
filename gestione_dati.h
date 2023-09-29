@@ -5,21 +5,15 @@
 #include <unistd.h>
 
 struct dati{
-    char on_of[3];
+    int on_of;
     int time;
 }data;
 
 int gestOF(struct dati data){
-    if(strcmp(data.on_of, "off")==0){
-        return -1; //in caso di off
+    if(data.on_of == 0){
+        return 0; //in caso di off
     }
-    if(strcmp(data.on_of, "OFF")==0){
-        return -1; //in caso di off
-    }
-    if(strcmp(data.on_of, "ON")==0){
-        return 0; //in caso di on
-    }
-    if(strcmp(data.on_of, "on")==0){
-        return 0; //in caso di on
+    if(data.on_of == 1){
+        return 1; //in caso di on
     }
 }

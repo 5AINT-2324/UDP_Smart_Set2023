@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "gestione_dati.h"
 
 #include "UDP.h"
 
@@ -39,7 +40,7 @@ int UDP_init(unsigned short port_number)
 }
 
 
-int UDP_send( unsigned long ip_address, unsigned short port_number, unsigned char data[], int byte)
+int UDP_send( unsigned long ip_address, unsigned short port_number,unsigned int data[], int byte)
 {
  struct sockaddr_in add; // struttura per indirizzo di destinazione
  int n;
@@ -50,20 +51,20 @@ int UDP_send( unsigned long ip_address, unsigned short port_number, unsigned cha
  add.sin_port = htons(port_number); // numero di porta UDP
  add.sin_addr.s_addr = htonl(ip_address); // indirizzo IP
  // trasmissione datagram
- if ((n = sendto (socket_id, (void *)data, byte, 0, (struct sockaddr*)&add, sizeof(add))) < 0)
+ if ((n = sendto (socket_id,data, byte, 0, (struct sockaddr*)&add, sizeof(add))) < 0)
    return -1;
  return n;
 }
 
 
-int UDP_receive( unsigned long *ip_address, unsigned short *port_number, unsigned char data[], int size)
+int UDP_receive( unsigned long *ip_address, unsigned short *port_number, unsigned int data[], int size)
 {
  struct sockaddr_in add; // struttura per indirizzo mittente
  unsigned int dim = sizeof(add);
  int n;
 
  // ricezione datagram (non bloccante)
- if ((n = recvfrom (socket_id, (void *)data, size, 0, (struct sockaddr*)&add, &dim)) <= 0)
+ if ((n = recvfrom (socket_id, data, size, 0, (struct sockaddr*)&add, &dim)) <= 0)
    return -1;
  // estrazione indirizzo IP e numero di porta UDP
  *ip_address = (unsigned long)(ntohl(add.sin_addr.s_addr));

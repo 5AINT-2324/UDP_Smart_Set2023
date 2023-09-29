@@ -14,7 +14,7 @@
 int ONOFF(unsigned char buffer[1024]) // 0 = OK 1 = ERR
 // (La funzione non è completa ma simula il funzionanamnto della lampadina)
 {
-    sleep(atoi((const char *) buffer[1])); //La funzione aspetta il tempo richiesto dall'utente'
+    sleep(buffer[1]);//La funzione aspetta il tempo richiesto dall'utente'
     return rand()%2; //E randomizzando risponde come una lampadina funzionanate o non funzionate
 }
 
@@ -50,7 +50,7 @@ int main(void)
         {
             if (ONOFF(buffer) == 1) {
                 printf("ERR 102: Object error\n\r");
-                buffer[1023] = 1; //Indicatore di errore
+                buffer[0] = 1; //Indicatore di errore
                 iSwitch = 1;
 
             }
@@ -63,7 +63,7 @@ int main(void)
 
     UDP_close();
     //Return in base al corretto funzionamento della lampadina
-    if(buffer[1023] == 0)
+    if(buffer[0] == 0)
         return 0;
     else
         return -1;
