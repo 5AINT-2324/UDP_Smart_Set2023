@@ -11,13 +11,13 @@ int UDP_init(unsigned short port_number);
 // di porta UDP un numero byte di dati contenuti nel buffer data
 // restituisce -1 in caso di errore, altrimenti il numero di byte
 // trasmessi
-int UDP_send( unsigned long ip_address, unsigned short port_number, unsigned char data[], int byte);
+int UDP_send( unsigned long ip_address, unsigned short port_number, unsigned int data[], int byte);
 
 // riceve un datagram nel buffer data di dimensione size
 // restituisce -1 in caso di errore o di dati non disponibili,
 // il numero di byte ricevuti in caso di successo; indirizzo IP e
 // numero di porta UDP del mittente sono restituiti come parametri
-int UDP_receive( unsigned long *ip_address, unsigned short *port_number, unsigned char data[], int size);
+int UDP_receive( unsigned long *ip_address, unsigned short *port_number, unsigned int data[], int size);
 
 // chiude il socket
 void UDP_close();
