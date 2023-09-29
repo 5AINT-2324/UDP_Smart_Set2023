@@ -52,11 +52,13 @@ int main(void)
                 printf("ERR 102: Object error\n\r");
                 buffer[1023] = 1; //Indicatore di errore
                 iSwitch = 1;
+
             }
-
-            UDP_send(ip_address, port_number, (void *) &buffer,sizeof(buffer)); // Send the datagram back to the client
+            else
+            {
+                UDP_send(ip_address, port_number, (void *) &buffer,sizeof(buffer)); // Send the datagram back to the server
+            }
         }
-
     }
 
     UDP_close();
@@ -65,7 +67,4 @@ int main(void)
         return 0;
     else
         return -1;
-}
-
-
 }
